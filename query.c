@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sqlite3.h>
+#include <stdint.h>
 
 typedef struct 
 {
@@ -16,36 +18,51 @@ typedef struct
     float lat;
 };
 */
+typedef struct ship_record {
+    int nRow;
+    int nCol;
+    char **recordes;
+} SHIP_RECORD;
     
-
-char* QueryAllShips()
+SHIP_RECORD* QueryAllShips()
 {
+    int i;
     sqlite3* db;
+    char* errmsg;
+    char** pResult;
+    int nRow;
+    int nCol;
+    int rLen = 0;
+    char *strSql="select ShipID from ships";
+    struct ship_record *record;
+
     int nResult = sqlite3_open("test.db",&db);
     if (nResult == SQLITE_OK)
     {
         printf("数据库打开成功\n");
     }
-    char* errmsg;
-    char** pResult;
-    int nRow;
-    int nCol;
-    char *strSql="select ShipID from ships";
 
-    nResult = sqlite3_get_table(db,strSql,&pResult,&nRow,&nCol,&errmsg);
+    //record = malloc(sizeof(struct ship_record) + sizeof(char *) * nRow);
+    //nResult = sqlite3_get_table(db,strSql,&pResult,&nRow,&nCol,&errmsg);
+    record = malloc(sizeof(struct ship_record));
+    nResult = sqlite3_get_table(db,strSql,&record->recordes, &record->nRow, &record->nCol, &errmsg);
 
-    printf("%s", pResult[2]);
+#if 0
+    printf("dx: %s\n", pResult[2]);
 
-    static char* shipid;
-    int i;
-    for(i=0;i<nRow;i++)
+    for(i=1;i<nRow;i++)
     {
-            &shipid = pResult[(i+1)];
+            rLen = strlen(pResult[i]);
+            record->record[i] = malloc(rLen + 1);
+            if (record->record[i]) {
+                memset(record->record[i], 0, rLen+1);
+                memcpy(record->record[i], pResult[i], rLen);
+            }
     }
-    printf("ship\n");
     sqlite3_free_table(pResult);
+#endif
     sqlite3_close(db);
-    return shipid;
+    return record;
 }
 
 
@@ -88,15 +105,34 @@ char* QueryAllShips()
 }
 */
 
+void ship_free_recordes(struct ship_record *r)
+{
+    int i = 0;
+#if 0
+    char *p = NULL;
+
+    for (i = 0; i < r->nRow; i++) {
+        p = r->recordes[i];
+        printf("p = %p: %s\n", p, p);
+        free(p);
+    }
+#endif
+    sqlite3_free_table(r->recordes);
+    free(r);
+}
 
 int main(){
-    char* a;
+    SHIP_RECORD* a;
     a=QueryAllShips();
-    printf("shipid:");
 
-    printf("%s", a[1]);
+    int i;
+    for(i=1;i<a->nRow;i++)
+    {
+        printf("%s\n", a->recordes[i]);
+    }
     //list<char>::iterator i;
     //i=a.begin();
+    ship_free_recordes(a);
 
     return 0;
 }
