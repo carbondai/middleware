@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sqlite3.h>
-#include <stdint.h>
+//#include <stdint.h>
 
-typedef struct 
+typedef struct ship_status
 {
-    int shipid;
+    char shipid;
     char outport;
     char location;
-    float speed;
-}ship_status;
+    char speed;
+} SHIP_STATUS;
 
 /*struct position
 {
@@ -29,10 +29,8 @@ SHIP_RECORD* QueryAllShips()
     int i;
     sqlite3* db;
     char* errmsg;
-    char** pResult;
     int nRow;
     int nCol;
-    int rLen = 0;
     char *strSql="select ShipID from ships";
     struct ship_record *record;
 
@@ -66,72 +64,47 @@ SHIP_RECORD* QueryAllShips()
 }
 
 
-/*ship_status QueryShipStatus(char shipid)
+SHIP_RECORD* QueryShipStatus()
 {
     sqlite3* db;
     int nResult = sqlite3_open("test.db",&db);
     if (nResult == SQLITE_OK)
     {
-        cout<<"数据库打开成功"<<endl;
+        printf("数据库打开成功\n");
     }
     char* errmsg;
-    char** pResult;
     int nRow;
     int nCol;
+    struct ship_record *record;
+    char* strSql = "select * from ships where shipid=1";
 
-    cout<<shipid<<endl;
+    //strSql += shipid;
 
-    string strSql("select * from ships where shipid=");
+    record = malloc(sizeof(struct ship_record));
+    nResult = sqlite3_get_table(db,strSql,&record->recordes,&record->nRow,&record->nCol,&errmsg);
 
-    strSql += shipid;
-
-    cout<< strSql <<endl;
-
-    nResult = sqlite3_get_table(db,strSql.c_str(),&pResult,&nRow,&nCol,&errmsg);
-
-    ship_status ship;
-
-    for(int i=0;i<nRow;i++)
-    {
-            ship.shipid = boost::lexical_cast<int>(pResult[(i+1)*nCol]);
-            ship.outport = (pResult[(i+1)*nCol+1]);
-            ship.location = (pResult[(i+1)*nCol+2]);
-            ship.speed = boost::lexical_cast<float>(pResult[(i+1)*nCol+3]);
-    }
-    sqlite3_free_table(pResult);
     sqlite3_close(db);
-    return ship;
+    return record;
     
 }
-*/
+
 
 void ship_free_recordes(struct ship_record *r)
 {
     int i = 0;
-#if 0
-    char *p = NULL;
-
-    for (i = 0; i < r->nRow; i++) {
-        p = r->recordes[i];
-        printf("p = %p: %s\n", p, p);
-        free(p);
-    }
-#endif
     sqlite3_free_table(r->recordes);
     free(r);
 }
 
 int main(){
     SHIP_RECORD* a;
-    a=QueryAllShips();
-
-    int i;
-    for(i=1;i<a->nRow;i++)
+    a=QueryShipStatus();
+    int i=0;
+    for (i;i<(a->nRow > a->nCol ? a->nRow : a->nCol);i++)
     {
-        printf("%s\n", a->recordes[i]);
+        printf("%s\n",a->recordes[i+a->nCol]);
     }
-    //list<char>::iterator i;
-    //i=a.begin();
+
     ship_free_recordes(a);
 
     return 0;
