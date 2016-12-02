@@ -1,8 +1,8 @@
 /*
- * multi_thread_socket_server.c
+ *  server.c
  *
- *  Created on: Mar 14, 2014
- *      Author: nerohwang
+ *  Created on: Nov 28, 2016
+ *  Author: Daixin
  */
 #include<stdlib.h>
 #include<pthread.h>
@@ -110,11 +110,6 @@ void* Data_handle(void * sock_fd)
             printf("Quit command!\n");
             break;                           //Break the while loop.
         }
-
-        int shipid=0;
-        int devid=0;
-
-        shipid = data_recv[0]
 
 
         printf("receive from client : %s\n",data_recv);
